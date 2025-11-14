@@ -49,7 +49,7 @@ const Chat = () => {
   return (
     <div className="h-full w-full relative flex flex-col bg-white rounded-lg sm:rounded-2xl shadow-xl border border-gray-100">
       {context && context?.file?.name && (
-        <div className="absolute top-2 sm:-top-10 right-2 sm:right-6 bg-green-100 border border-green-200 rounded-lg px-2 sm:px-4 py-1 sm:py-2 max-w-xs z-10">
+        <div className="absolute top-2  right-2  bg-green-100 border border-green-200 rounded-lg px-2 sm:px-4 py-1 sm:py-2 max-w-xs z-10">
           <div className="flex items-center space-x-1 sm:space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-800 text-xs sm:text-sm font-medium truncate">
@@ -64,17 +64,34 @@ const Chat = () => {
             messages.map((message, idx) => (
               <>
                 <div
-                  className="bg-slate-100 rounded-xl sm:rounded-2xl max-w-[85%] sm:max-w-[80%] lg:max-w-[calc(100%-200px)] ml-auto p-2 sm:p-3 shadow-lg"
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl max-w-[85%] sm:max-w-[80%] lg:max-w-[calc(100%-200px)] ml-auto p-2 sm:p-3 shadow-lg"
                   key={idx}
                 >
-                  <p className="text-sm sm:text-base text-gray-800">
+                  <p className="text-sm sm:text-base text-white font-medium">
                     {message.user}
                   </p>
                 </div>
-                <div className="bg-sky-300 max-w-[85%] sm:max-w-[80%] lg:max-w-[calc(100%-200px)] mr-auto p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg">
-                  <p className="text-sm sm:text-base text-gray-800">
-                    {message.ai}
-                  </p>
+                <div className="bg-gradient-to-r from-gray-100 to-gray-200 max-w-[85%] sm:max-w-[80%] lg:max-w-[calc(100%-200px)] mr-auto p-2 sm:p-3 rounded-xl sm:rounded-2xl shadow-lg border border-gray-300">
+                  <div className="flex items-start space-x-2">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base text-gray-800 font-medium leading-relaxed">
+                        {message.ai || (
+                          <span className="flex items-center space-x-2 text-gray-500">
+                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-xs">Thinking...</span>
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </>
             ))
