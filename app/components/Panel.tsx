@@ -2,7 +2,11 @@
 import React, { useContext, useState } from "react";
 import { FileSelectContext } from "../context/FileSelectContextWrapper";
 
-const Panel = () => {
+interface PanelProps {
+  onClose?: () => void;
+}
+
+const Panel = ({ onClose }: PanelProps) => {
   const context = useContext(FileSelectContext);
 
   const [files, setFiles] = useState<Array<File>>([]);
@@ -31,8 +35,19 @@ const Panel = () => {
   console.log(files);
 
   return (
-    <div className="h-auto lg:h-full bg-white border-b lg:border-r lg:border-b-0 border-gray-200 w-full lg:w-72 xl:w-80 flex flex-col shadow-lg">
-      <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-purple-600">
+    <div className="h-screen lg:h-full bg-white border-r border-gray-200 w-80 flex flex-col shadow-lg">
+      <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-purple-600 relative">
+        {/* Mobile close button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden absolute top-4 right-4 p-1 text-white hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
         <h2 className="text-white text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Document Library</h2>
         <p className="text-blue-100 text-xs sm:text-sm">Upload and manage your PDF files</p>
       </div>
@@ -60,7 +75,7 @@ const Panel = () => {
         </label>
       </div>
 
-      <div className="flex-1 overflow-y-auto max-h-48 lg:max-h-none">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-3 sm:p-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Uploaded Files ({files.length})</h3>
           {files.length === 0 ? (

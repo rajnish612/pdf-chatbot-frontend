@@ -49,7 +49,7 @@ const Chat = () => {
   return (
     <div className="h-full w-full relative flex flex-col bg-white rounded-lg sm:rounded-2xl shadow-xl border border-gray-100">
       {context && context?.file?.name && (
-        <div className="absolute -top-8 sm:-top-10 right-2 sm:right-6 bg-green-100 border border-green-200 rounded-lg px-2 sm:px-4 py-1 sm:py-2 max-w-xs z-10">
+        <div className="absolute top-2 sm:-top-10 right-2 sm:right-6 bg-green-100 border border-green-200 rounded-lg px-2 sm:px-4 py-1 sm:py-2 max-w-xs z-10">
           <div className="flex items-center space-x-1 sm:space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-800 text-xs sm:text-sm font-medium truncate">
@@ -58,7 +58,7 @@ const Chat = () => {
           </div>
         </div>
       )}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 pt-10 flex flex-col min-h-0">
         <div className="flex-1 flex flex-col gap-3 sm:gap-5 overflow-y-auto p-3 sm:p-6 lg:p-8">
           {messages.length !== 0 ? (
             messages.map((message, idx) => (
