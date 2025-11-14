@@ -10,32 +10,135 @@ const Panel = ({ onClose }: PanelProps) => {
   const context = useContext(FileSelectContext);
 
   const [files, setFiles] = useState<Array<File>>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set());
+  
+  const showError = (message: string) => {
+    setUploadError(message);
+    setTimeout(() => setUploadError(null), 5000);
+  };
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0].type == "application/pdf")
-      setFiles([...files, e.target.files[0]]);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      showError("Please select a PDF file only.");
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      showError("File size must be less than 10MB.");
+      return;
+    }
+
+    // Check for duplicate files
+    const isDuplicate = files.some(existingFile => 
+      existingFile.name === file.name && existingFile.size === file.size
+    );
+    
+    if (isDuplicate) {
+      showError("This file has already been uploaded.");
+      return;
+    }
+
+    setFiles([...files, file]);
+    setUploadError(null);
+    
+    // Reset the input
+    e.target.value = '';
   };
 
   const handleSelectFile = async (idx: number) => {
-    if (!context) return;
+    if (!context) {
+      showError("Context not available. Please refresh the page.");
+      return;
+    }
+    
     const { setFile } = context;
+    const selectedFile = files[idx];
+    
+    if (!selectedFile) {
+      showError("Selected file not found.");
+      return;
+    }
+
+    setUploadingFiles(prev => new Set([...prev, idx]));
+    setUploadError(null);
+    
     const formdata = new FormData();
-    formdata.append("file", files[idx]);
+    formdata.append("file", selectedFile);
+    
     try {
+      if (!process.env.NEXT_PUBLIC_SERVER_URL) {
+        throw new Error("Server URL not configured. Please check your environment variables.");
+      }
+
       const res = await fetch(process.env.NEXT_PUBLIC_SERVER_URL + "/upload", {
         method: "POST",
         body: formdata,
+        signal: AbortSignal.timeout(60000), // 60 second timeout for file upload
       });
-      if (res.ok) {
-        setFile(files[idx]);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData.detail || errorData.message || `Upload failed: ${res.status} ${res.statusText}`;
+        throw new Error(errorMessage);
       }
+
+      const result = await res.json().catch(() => ({}));
+      
+      // Successfully uploaded
+      setFile(selectedFile);
+      
     } catch (err) {
-      console.log("error", err);
+      console.error("Upload error:", err);
+      
+      let errorMessage = "Failed to upload file. Please try again.";
+      
+      if (err instanceof Error) {
+        if (err.name === 'TimeoutError') {
+          errorMessage = "Upload timed out. The file might be too large or the server is busy.";
+        } else if (err.message.includes('fetch')) {
+          errorMessage = "Unable to connect to the server. Please check your internet connection.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      showError(errorMessage);
+    } finally {
+      setUploadingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(idx);
+        return newSet;
+      });
     }
   };
   console.log(files);
 
   return (
-    <div className="h-screen lg:h-full bg-white border-r border-gray-200 w-80 flex flex-col shadow-lg">
+    <div className="h-screen lg:h-full bg-white border-r border-gray-200 w-80 flex flex-col shadow-lg relative">
+      {/* Error Toast */}
+      {uploadError && (
+        <div className="absolute top-4 left-4 right-4 z-50 bg-red-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center space-x-2">
+          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <span className="text-xs flex-1">{uploadError}</span>
+          <button 
+            onClick={() => setUploadError(null)}
+            className="hover:bg-red-600 rounded p-0.5"
+          >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-purple-600 relative">
         {/* Mobile close button */}
         {onClose && (
@@ -89,37 +192,47 @@ const Panel = ({ onClose }: PanelProps) => {
             <ul className="space-y-1 sm:space-y-2">
               {files?.map((file, idx) => {
                 const isSelected = context?.file?.name === file.name;
+                const isUploading = uploadingFiles.has(idx);
                 return (
                   <li 
-                    onClick={() => handleSelectFile(idx)} 
+                    onClick={() => !isUploading && handleSelectFile(idx)} 
                     key={idx}
-                    className={`p-2 sm:p-3 rounded-lg border cursor-pointer transition-all duration-200 group ${
-                      isSelected 
-                        ? 'bg-blue-50 border-blue-200 shadow-md' 
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300'
+                    className={`p-2 sm:p-3 rounded-lg border transition-all duration-200 ${
+                      isUploading 
+                        ? 'cursor-wait bg-blue-50 border-blue-200' 
+                        : isSelected 
+                        ? 'bg-blue-50 border-blue-200 shadow-md cursor-pointer' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300 cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center space-x-2 sm:space-x-3">
                       <div className={`flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${
-                        isSelected ? 'bg-blue-100' : 'bg-white'
+                        isUploading ? 'bg-blue-200' : isSelected ? 'bg-blue-100' : 'bg-white'
                       }`}>
-                        <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                          isSelected ? 'text-blue-600' : 'text-gray-400'
-                        }`} fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                        </svg>
+                        {isUploading ? (
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className={`w-3 h-3 sm:w-4 sm:h-4 ${
+                            isSelected ? 'text-blue-600' : 'text-gray-400'
+                          }`} fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                          </svg>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-xs sm:text-sm font-medium truncate ${
-                          isSelected ? 'text-blue-900' : 'text-gray-900'
+                          isUploading ? 'text-blue-900' : isSelected ? 'text-blue-900' : 'text-gray-900'
                         }`}>
                           {file?.name}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                          {isUploading ? 'Uploading...' : `${(file.size / 1024 / 1024).toFixed(2)} MB`}
                         </p>
                       </div>
-                      {isSelected && (
+                      {isSelected && !isUploading && (
                         <div className="flex-shrink-0">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         </div>
