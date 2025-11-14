@@ -38,19 +38,14 @@ const Page = () => {
           </button>
           <div className="pb-2 flex-shrink-0">
             <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 text-md sm:text-3xl font-bold tracking-tight">
-              PDF Chatbot
+              Generative Artificial Intelligence Project (PDF Chatbot)
             </h1>
             <p className="text-gray-600 text-sm sm:text-base lg:text-lg  font-medium">
               Upload a PDF and chat with your documents
             </p>
             <div className=" space-y-1">
-              <p className="text-gray-500 text-xs sm:text-sm">
-                <span className="font-semibold text-blue-600">
-                  Generative Artificial Intelligence Project
-                </span>{" "}
-                •
-              </p>
-              <p className="text-blue-600 text-xs">
+              
+              <p className="text-blue-600 text-md lg:text-lg">
                 <span className="font-medium">Author:</span> Rajnish Nath •
                 <span className="font-medium">Education:</span> BCA
                 Undergraduate, Manipal University Jaipur

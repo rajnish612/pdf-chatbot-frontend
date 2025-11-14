@@ -22,20 +22,17 @@ const Panel = ({ onClose }: PanelProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (file.type !== "application/pdf") {
       showError("Please select a PDF file only.");
       return;
     }
 
-    // Validate file size (10MB limit)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       showError("File size must be less than 10MB.");
       return;
     }
 
-    // Check for duplicate files
     const isDuplicate = files.some(existingFile => 
       existingFile.name === file.name && existingFile.size === file.size
     );
@@ -48,7 +45,6 @@ const Panel = ({ onClose }: PanelProps) => {
     setFiles([...files, file]);
     setUploadError(null);
     
-    // Reset the input
     e.target.value = '';
   };
 
@@ -90,12 +86,9 @@ const Panel = ({ onClose }: PanelProps) => {
       }
 
       const result = await res.json().catch(() => ({}));
-      
-      // Successfully uploaded
       setFile(selectedFile);
       
     } catch (err) {
-      console.error("Upload error:", err);
       
       let errorMessage = "Failed to upload file. Please try again.";
       
@@ -118,11 +111,9 @@ const Panel = ({ onClose }: PanelProps) => {
       });
     }
   };
-  console.log(files);
 
   return (
     <div className="h-screen lg:h-full bg-white border-r border-gray-200 w-80 flex flex-col shadow-lg relative">
-      {/* Error Toast */}
       {uploadError && (
         <div className="absolute top-4 left-4 right-4 z-50 bg-red-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center space-x-2">
           <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -140,7 +131,6 @@ const Panel = ({ onClose }: PanelProps) => {
         </div>
       )}
       <div className="p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-600 to-purple-600 relative">
-        {/* Mobile close button */}
         {onClose && (
           <button
             onClick={onClose}
