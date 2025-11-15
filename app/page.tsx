@@ -17,7 +17,7 @@ const Page = () => {
             <div className=" space-y-1">
               
               <p className="text-blue-600 text-md lg:text-lg">
-                <span className="font-medium">Author:</span> Rajnish Nath •
+                <span className="font-medium">Developer:</span> Rajnish Nath •
                 <span className="font-medium">Education:</span> BCA
                 Undergraduate, Manipal University Jaipur
               </p>
