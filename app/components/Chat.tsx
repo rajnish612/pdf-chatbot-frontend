@@ -310,11 +310,11 @@ const Chat = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                 readOnly={!uploadedFile}
-                className="flex-1 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-gray-800 placeholder-gray-500 bg-transparent outline-none text-sm sm:text-base lg:text-lg"
+                className="flex-1 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-gray-800 placeholder-gray-500 bg-transparent outline-none text-sm sm:text-base lg:text-lg min-w-0"
                 type="text"
                 placeholder={!uploadedFile ? "Please upload a PDF first..." : "Ask anything about your document..."}
               />
-              <label className="flex items-center justify-center px-3 sm:px-4 cursor-pointer hover:bg-gray-50 transition-colors border-r border-gray-200">
+              <label className="flex items-center justify-center px-2 sm:px-3 cursor-pointer hover:bg-gray-50 transition-colors border-r border-gray-200 shrink-0">
                 <input
                   type="file"
                   accept="application/pdf"
@@ -334,11 +334,11 @@ const Chat = () => {
                 )}
               </label>
               <button
-                className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-2 sm:px-4 lg:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 onClick={handleSend}
                 disabled={!uploadedFile || !query || context?.messageLoading || isUploading}
               >
-                <span className="flex items-center space-x-1 sm:space-x-2">
+                <span className="flex items-center space-x-1">
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
