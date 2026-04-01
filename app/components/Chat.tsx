@@ -275,6 +275,12 @@ const Chat = () => {
                   the document. Get instant, intelligent responses powered by
                   AI.
                 </p>
+                <div className="mt-4 inline-flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-left shadow-sm">
+                  <span className="text-amber-900 text-sm sm:text-base font-extrabold">Notice:</span>
+                  <p className="text-amber-900 text-xs sm:text-sm font-bold leading-relaxed">
+                    The first request may be slower because the AI API is running on a free tier.
+                  </p>
+                </div>
               </div>
             </div>
           )}
